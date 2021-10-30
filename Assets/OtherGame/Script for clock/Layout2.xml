@@ -1,0 +1,30 @@
+<xml>
+	<!-- This file holds info for laying out the Prospector card game. -->
+	
+	<!-- The multiplier is multiplied by the x and y attributes below. -->
+	<!-- This determines how loose or tight the layout is. --> 
+	<multiplier x="1.25" y="1.5" />
+	
+	<!-- In the XML below, id is the number of the card -->
+	<!-- x and y set position -->
+	<!-- faceup is 1 if the card is face-up -->
+	<!-- layer sets the depth layer so cards overlap properly -->
+	<!-- hiddenby is the ids of cards that keep a card face-down -->
+	
+	<slot id="0" type="drawpile" x="0" y="6" xstagger="0.3" layer="4"/>
+	<slot id="1" type="drawpile" x="3" y="5.2" xstagger="0.3" layer="4"/>
+	<slot id="2" type="drawpile" x="5.2" y="3" xstagger="0.3" layer="4"/>
+	<slot id="3" type="drawpile" x="6" y="0" xstagger="0.3" layer="4"/>
+	<slot id="4" type="drawpile" x="5.2" y="-3" xstagger="0.3" layer="4"/>
+	<slot id="5" type="drawpile" x="3" y="-5.2" xstagger="0.3" layer="4"/>
+	<slot id="6" type="drawpile" x="0" y="-6" xstagger="0.3" layer="4"/>
+	<slot id="7" type="drawpile" x="-3" y="-5.2" xstagger="0.3" layer="4"/>
+	<slot id="8" type="drawpile" x="-5.2" y="-3" xstagger="0.3" layer="4"/>
+	<slot id="9" type="drawpile" x="-6" y="0" xstagger="0.3" layer="4"/>
+	<slot id="10" type="drawpile" x="-5.2" y="3" xstagger="0.3" layer="4"/>
+	<slot id="11" type="drawpile" x="-3" y="5.2" xstagger="0.3" layer="4"/>
+	<slot id="12" type="drawpile" x="0" y="0" xstagger="0.3" layer="4"/>
+
+	
+	
+</xml>

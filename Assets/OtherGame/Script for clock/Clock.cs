@@ -1,13 +1,12 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-
-public class Prospector : MonoBehaviour {
-
-	static public Prospector 	S;
+public class Clock : MonoBehaviour
+{
+static public Clock 	S;
 
 	[Header("Set in Inspector")]
 	public TextAsset			deckXML;
@@ -23,7 +22,7 @@ public class Prospector : MonoBehaviour {
 
 	[Header("Set Dynamically")]
 	public Deck					deck;
-	public Layout               layout;
+	public LayOut2               layout;
 	public List<CardProspector> drawPile;
 	public Transform            layoutAnchor;
 	public CardProspector       target;
@@ -86,7 +85,7 @@ public class Prospector : MonoBehaviour {
 			}
 		*/
 
-		layout = GetComponent<Layout>();
+		layout = GetComponent<LayOut2>();
 		layout.ReadLayout(layoutXML.text);
 		drawPile = ConvertListCardToListCardProspectors(deck.cards);
 

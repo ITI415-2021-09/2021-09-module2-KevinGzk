@@ -2,6 +2,9 @@ Base path: 'E:/Unity/2020.3.0f1/Editor/Data', plugins path 'E:/Unity/2020.3.0f1/
 Cmd: initializeCompiler
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 Cmd: shutdown
+=======
+>>>>>>> parent of ba484e6 (still have the layering issue, but change ths deck xml file)
 =======
 >>>>>>> parent of ba484e6 (still have the layering issue, but change ths deck xml file)
