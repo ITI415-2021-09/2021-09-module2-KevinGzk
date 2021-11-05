@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum eCardState
 {
@@ -21,7 +22,14 @@ public class CardProspector : Card
 
     override public void OnMouseUpAsButton()
     {
-        Prospector.S.CardClicked(this);
+        if(SceneManager.GetActiveScene().name=="Clock")
+        {
+            Clock.S.CardClicked(this);
+        }
+        else
+        {
+            Prospector.S.CardClicked(this);
+        }
         base.OnMouseUpAsButton();
     }
 }

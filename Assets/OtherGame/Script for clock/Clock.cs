@@ -17,7 +17,7 @@ static public Clock 	S;
 	public Vector2              fsPosMid2 = new Vector2(0.4f, 1.0f);
 	public Vector2              fsPosEnd = new Vector2(0.5f, 0.95f);
 	public float                reloadDelay = 2f;
-	public Text                 gameOverText, roundResultText, hightScoreText;
+	public Text                 gameOverText;
 
 
 	[Header("Set Dynamically")]
@@ -28,7 +28,11 @@ static public Clock 	S;
 	public CardProspector       target;
 	public List<CardProspector> tableau;
 	public List<CardProspector> discardPile;
+	public List<List<CardProspector>> cardpiles = new List<List<CardProspector>>();
+	List<CardProspector> pile = new List<CardProspector>();
+	List<CardProspector> midpile = new List<CardProspector>();
 	public FloatingScore        fsRun;
+	public int kings = 4;
 
 
 
@@ -41,10 +45,7 @@ static public Clock 	S;
 	{
 		//set up the HighScore UI Text
 		GameObject go = GameObject.Find("HighScore");
-		if(go != null)
-		{
-			hightScoreText = go.GetComponent<Text>();
-		}
+		
 		int hightScore = ScoreManager.HIGH_SCORE;
 		string hScore = "High Score: " + Utils.AddCommasToNumber(hightScore);
 		go.GetComponent<Text>().text = hScore;
@@ -56,10 +57,7 @@ static public Clock 	S;
 		}
 
 		go = GameObject.Find("RoundResult");
-		if(go != null)
-		{
-			roundResultText = go.GetComponent<Text>();
-		}
+		
 
 		ShowResultsUI(false);
 	}
@@ -67,7 +65,6 @@ static public Clock 	S;
 	void ShowResultsUI(bool show)
 	{
 		gameOverText.gameObject.SetActive(show);
-		roundResultText.gameObject.SetActive(show);
 	}
 	void Start() {
 		Scoreboard.S.score = ScoreManager.SCORE;
@@ -76,19 +73,11 @@ static public Clock 	S;
 
 		Deck.Shuffle(ref deck.cards);
 
-		/*
-		Card c;
-			for(int cNum = 0; cNum < deck.cards.Count; cNum++)
-			{
-				c = deck.cards[cNum];
-				c.transform.localPosition = new Vector3((cNum%13)*3, cNum/13*4, 0);
-			}
-		*/
+		
 
 		layout = GetComponent<LayOut2>();
 		layout.ReadLayout(layoutXML.text);
 		drawPile = ConvertListCardToListCardProspectors(deck.cards);
-
 		LayoutGame();
 
 	}
@@ -122,29 +111,41 @@ static public Clock 	S;
 		}
 
 		CardProspector cp;
+		int counter = 0;
 		foreach (SlotDef tSD in layout.slotDefs)
 		{
+			counter++;
 			cp = Draw();
+			pile.Add(cp);
 			cp.faceUp = tSD.faceUp;
 			cp.transform.parent = layoutAnchor;
-			cp.transform.localPosition = new Vector3(layout.multiplier.x * tSD.x, layout.multiplier.y * tSD.y, -tSD.layerID);
+			cp.transform.localPosition = new Vector3(
+				layout.multiplier.x * tSD.x,
+				layout.multiplier.y * tSD.y,
+				-tSD.layerID);
 			cp.layoutID = tSD.id;
 			cp.slotDef = tSD;
 			cp.state = eCardState.tableua;
-
 			cp.SetsortingLayerName(tSD.layerName);
+
+			if (counter % 4 == 0)
+			{
+				cardpiles.Add(pile);
+				pile = new List<CardProspector>();
+			}
+
+			if (counter > 48)
+			{
+				midpile.Add(cp);
+			}
+			if (counter == 52)
+			{
+				cardpiles.Add(midpile);
+			}
+
 			tableau.Add(cp);
 		}
-
-		foreach (CardProspector tCP in tableau)
-		{
-			foreach (int hid in tCP.slotDef.hiddenBy)
-			{
-				cp = FindCardByLayoutID(hid);
-				tCP.hiddenBy.Add(cp);
-			}
-		}
-		MoveToTarget(Draw());
+		//MoveToTarget(Draw());
 		UpdateDrawPile();
 	}
 
@@ -160,19 +161,11 @@ static public Clock 	S;
 		return(null);
 	}
 
-	void SetTableauFaces()
+	void SetTableauFaces(CardProspector card)
 	{
-		foreach (CardProspector cd in tableau)
+		if(card.rank <= 13)
 		{
-			bool faceUp = true;
-			foreach (CardProspector cover in cd.hiddenBy)
-			{
-				if(cover.state == eCardState.tableua)
-				{
-					faceUp = false;
-				}
-			}
-			cd.faceUp = faceUp;
+			(cardpiles[card.rank - 1])[(cardpiles[card.rank - 1].Count - 1)].faceUp = true;
 		}
 	}
 
@@ -235,24 +228,33 @@ static public Clock 	S;
 				MoveToDiscard(target);
 				MoveToTarget(Draw());
 				UpdateDrawPile();
-				ScoreManager.EVENT(eScoreEvent.draw);
-				FloatingScoreHandler(eScoreEvent.draw);
 				break;
+
 			case eCardState.tableua:
 				bool validMatch = true;
 				if(!cd.faceUp)
 				{
 					validMatch = false;
 				}
-				if(!AdjacentRank(cd, target))
-				{
-					validMatch = false;
-				}
 				if(!validMatch) return;
 
 				tableau.Remove(cd);
+				
+				foreach (List<CardProspector> x in cardpiles)
+				{
+					x.Remove(cd);
+				}
 				MoveToTarget(cd);
-				SetTableauFaces();
+
+				if(cd.rank == 13)
+				{
+					kings--;
+				}
+
+				if(kings >0)
+				{
+					SetTableauFaces(cd);
+				}
 				ScoreManager.EVENT(eScoreEvent.mine);
 				FloatingScoreHandler(eScoreEvent.mine);
 				break;
@@ -262,24 +264,20 @@ static public Clock 	S;
 
 	void CheckForGameOver()
 	{
-		if(tableau.Count == 0)
+		int king = 0;
+		foreach (List<CardProspector> list in cardpiles)
 		{
-			GameOver(true);
-			return;
-		}
-		if(drawPile.Count > 0)
-		{
-			return;
-		}
-
-		foreach (CardProspector cd in tableau)
-		{
-			if(AdjacentRank(cd, target))
+			foreach (CardProspector cd in list)
 			{
-				return;
+				if (cd.rank == 13)
+				{
+					king++;
+				}
 			}
 		}
-		GameOver(false);
+
+		if (king <= 0)
+			GameOver(true);
 	}
 
 	void GameOver(bool won)
@@ -289,7 +287,6 @@ static public Clock 	S;
 		if(won)
 		{
 			gameOverText.text = "Round Over";
-			roundResultText.text = "You won this round!\n Round Score: " + score;
 			ShowResultsUI(true);
 			//print("Game over. You won! :)");
 			ScoreManager.EVENT(eScoreEvent.gameWin);
@@ -301,11 +298,9 @@ static public Clock 	S;
 			if(ScoreManager.HIGH_SCORE <= score)
 			{
 				string str = "you got the hight score!\n High score: " + score;
-				roundResultText.text = str;
 			}
 			else
 			{
-				roundResultText.text = "your final score was: " + score;
 			}
 			ShowResultsUI(true);
 			//print("Game over. You lost. :(");
